@@ -1,0 +1,181 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+.envrc
+*.env
+.env.example.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.eslintcache
+.next/
+out/
+.nuxt/
+.cache/
+.turbo/
+.vercel
+*.tsbuildinfo
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.cursor/
+*.code-workspace
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Secrets and credentials
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+*.secret
+*.credentials
+*.token
+kubeconfig*
+.kube/
+*.kubeconfig
+
+# Kubernetes
+k8s/secrets.yaml
+k8s/secrets.yml
+k8s/*-secrets.yaml
+k8s/*-secrets.yml
+*.kubeconfig
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars
+.terraform.tfstate.lock.info
+terraform/k3s-node-token
+
+# Helm
+helm/**/charts/*.tgz
+helm/**/*.tgz
+
+# Ansible
+*.retry
+ansible/group_vars/**/vault.yml
+ansible/vault_passwords.txt
+*.vault
+ansible/vault_passwords.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+*.orig
+
+# Build artifacts
+*.tar.gz
+*.zip
+*.jar
+*.war
+*.ear
+*.whl
+*.egg
+
+# Docker
+docker-compose.override.yml
+.dockerignore.local
+
+# Test coverage
+coverage/
+.nyc_output/
+.coverage
+htmlcov/
+*.cover
+.coverage.*
+coverage.xml
+*.lcov
+
+# WireGuard (if applicable)
+wireguard/clients/*.conf
+wireguard/clients/*.private
+wireguard/clients/*.png
+
+# Vault backups (if applicable)
+vault-backup-*.json
+backups/vault-*
+
+# Data directories (uncomment if needed)
+# data/
+# backups/
+# uploads/
+
+# Project-specific
+TEST_RESULTS.md
+*.local

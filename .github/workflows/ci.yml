@@ -1,0 +1,201 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  # Linting and code quality checks
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Python linting (if applicable)
+      - name: Set up Python
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' || hashFiles('pyproject.toml') != '' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
+        run: |
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+          if [ -f "requirements-dev.txt" ]; then
+            pip install -r requirements-dev.txt
+          fi
+
+      - name: Run Python linting
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' || hashFiles('pyproject.toml') != '' }}
+        run: |
+          # Install linting tools if not in requirements
+          pip install ruff mypy black || true
+          # Run ruff (fast Python linter)
+          # Check root and common subdirectories
+          if [ -f "pyproject.toml" ] || [ -f "ruff.toml" ]; then
+            ruff check . || true
+          else
+            find . -name "*.py" -not -path "*/venv/*" -not -path "*/env/*" -not -path "*/__pycache__/*" -exec dirname {} \; | sort -u | while read dir; do
+              [ -f "$dir/pyproject.toml" ] || [ -f "$dir/ruff.toml" ] && ruff check "$dir" || true
+            done
+          fi
+          # Run mypy (type checking)
+          mypy . --ignore-missing-imports || true
+        continue-on-error: true
+
+      # Node.js linting (if applicable)
+      - name: Set up Node.js
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node.js dependencies
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+          fi
+          # Install dependencies in subdirectories (e.g., frontend/, apps/)
+          find . -name "package.json" -not -path "*/node_modules/*" -not -path "./node_modules/*" -exec sh -c 'cd "$(dirname "$1")" && [ -f "package-lock.json" ] && npm ci || true' _ {} \;
+
+      - name: Run Node.js linting
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        run: |
+          # Run lint in root if package.json exists
+          if [ -f "package.json" ] && grep -q '"lint"' package.json; then
+            npm run lint || true
+          fi
+          # Run lint in subdirectories
+          find . -name "package.json" -not -path "*/node_modules/*" -not -path "./node_modules/*" -exec sh -c 'cd "$(dirname "$1")" && [ -f "package.json" ] && grep -q "lint" package.json && npm run lint || true' _ {} \;
+        continue-on-error: true
+
+  # Type checking
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Run Python type checking
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
+        run: |
+          pip install mypy || true
+          mypy . --ignore-missing-imports || true
+        continue-on-error: true
+
+      - name: Set up Node.js
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run Node.js type checking
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        run: |
+          # Run type-check in root if package.json exists
+          if [ -f "package.json" ] && grep -q '"type-check"' package.json; then
+            npm ci
+            npm run type-check || true
+          fi
+          # Run type-check in subdirectories
+          find . -name "package.json" -not -path "*/node_modules/*" -not -path "./node_modules/*" -exec sh -c 'cd "$(dirname "$1")" && [ -f "package.json" ] && grep -q "type-check" package.json && npm ci && npm run type-check || true' _ {} \;
+        continue-on-error: true
+
+  # Tests
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Python tests
+      - name: Set up Python
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python test dependencies
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
+        run: |
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+          if [ -f "requirements-dev.txt" ]; then
+            pip install -r requirements-dev.txt
+          fi
+          pip install pytest pytest-cov || true
+
+      - name: Run Python tests
+        if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
+        run: |
+          pytest --cov=. --cov-report=xml --cov-report=term || true
+        continue-on-error: true
+
+      # Node.js tests
+      - name: Set up Node.js
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run Node.js tests
+        if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
+        run: |
+          # Run tests in root if package.json exists
+          if [ -f "package.json" ] && grep -q '"test"' package.json; then
+            npm ci
+            npm test || true
+          fi
+          # Run tests in subdirectories
+          find . -name "package.json" -not -path "*/node_modules/*" -not -path "./node_modules/*" -exec sh -c 'cd "$(dirname "$1")" && [ -f "package.json" ] && grep -q "test" package.json && npm ci && npm test || true' _ {} \;
+        continue-on-error: true
+
+  # Build verification
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        if: ${{ hashFiles('Dockerfile') != '' || hashFiles('**/Dockerfile') != '' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ghcr.io/raolivei/PROJECT_NAME:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

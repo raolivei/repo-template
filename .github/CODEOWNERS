@@ -1,0 +1,51 @@
+# Code Owners
+# This file defines code ownership for the repository.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @raolivei
+
+# GitHub workflows and configuration
+/.github/ @raolivei
+
+# Documentation
+/*.md @raolivei
+/docs/ @raolivei
+
+# CI/CD workflows
+/.github/workflows/ @raolivei
+
+# Branch protection configuration
+/github/ @raolivei
+
+# Examples and templates
+/examples/ @raolivei
+
+# Scripts
+/scripts/ @raolivei
+
+# Backend code (if applicable)
+# /backend/ @backend-team
+
+# Frontend code (if applicable)
+# /frontend/ @frontend-team
+
+# Infrastructure as code
+# /terraform/ @devops-team
+# /k8s/ @devops-team
+# /helm/ @devops-team
+
+# Tests
+# /tests/ @qa-team
+# /test/ @qa-team
+
+
+
+
+
+
+
+
+
+
+

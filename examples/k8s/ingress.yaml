@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: PROJECT_NAME-ingress
+  namespace: PROJECT_NAME
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - PROJECT_NAME.example.com
+      secretName: PROJECT_NAME-tls
+  rules:
+    - host: PROJECT_NAME.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: PROJECT_NAME-api
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: PROJECT_NAME-frontend
+                port:
+                  number: 3000
+
+---
+# Namespace (create this first)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: PROJECT_NAME
+  labels:
+    name: PROJECT_NAME
+
+
+
+
+
+
+
+
+
+
