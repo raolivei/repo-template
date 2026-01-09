@@ -22,7 +22,7 @@ jobs:
       # Python linting (if applicable)
       - name: Set up Python
         if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' || hashFiles('pyproject.toml') != '' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -93,7 +93,7 @@ jobs:
 
       - name: Set up Python
         if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -135,7 +135,7 @@ jobs:
       # Python tests
       - name: Set up Python
         if: ${{ hashFiles('requirements.txt') != '' || hashFiles('**/requirements.txt') != '' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
