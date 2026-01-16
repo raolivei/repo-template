@@ -1,0 +1,101 @@
+# [PROJECT_NAME] - Cursor Rules
+
+## Workspace
+
+See `../workspace-config/docs/PROJECT_CONVENTIONS.md` for shared conventions (git workflow, CHANGELOG, Docker/GHCR, K8s, security).
+
+**Ports** (from `../workspace-config/ports/.env.ports`):
+
+- Frontend: `[PORT]`
+- API: `[PORT]`
+- Database: `[PORT]`
+
+## Commands
+
+```bash
+# Development (Docker Compose - recommended)
+source ../workspace-config/ports/.env.ports
+docker-compose up                    # Start all services
+docker-compose up -d                 # Start detached
+
+# Testing
+docker-compose exec api pytest       # Backend tests (Python)
+cd frontend && npm test              # Frontend tests (TypeScript)
+
+# Linting (run after changes)
+cd backend && ruff check . && ruff format .  # Python
+cd frontend && npm run lint                   # TypeScript
+
+# Database (if applicable)
+docker-compose exec api alembic upgrade head  # Run migrations
+docker-compose exec postgres psql -U postgres -d [DB_NAME]  # Shell
+```
+
+## Workflow
+
+1. Always lint/format after code changes
+2. Run tests before committing
+3. Update CHANGELOG.md for all changes
+4. Never run git commands at workspace root
+
+## Project Overview
+
+[Brief description of the project - 1-2 sentences]
+
+**CLUSTER**: Deployed on the **`eldertree`** Raspberry Pi k3s cluster (when applicable).
+
+```
+[project-name]/
+├── backend/           # [Tech] backend
+│   ├── api/          # API endpoints
+│   ├── models/       # Data models
+│   └── services/     # Business logic
+├── frontend/         # [Tech] frontend
+│   ├── components/   # UI components
+│   └── utils/        # Utilities
+└── k8s/              # Kubernetes manifests
+```
+
+## Code Style
+
+**Python**: See `backend/[example_file].py` for patterns. Use type hints, Google-style docstrings.
+
+**TypeScript**: See `frontend/components/[ExampleComponent].tsx` for patterns. Use strict TypeScript, Tailwind CSS.
+
+## Common Tasks
+
+### Adding API Endpoint
+
+1. Add route in `backend/api/`
+2. Add model in `backend/models/`
+3. Add tests
+4. Update API docs
+
+### Adding Frontend Component
+
+1. Create in `frontend/components/`
+2. Use Tailwind for styling
+3. Follow existing patterns
+
+## Docker Images
+
+- API: `ghcr.io/raolivei/[project-name]-api:<tag>`
+- Frontend: `ghcr.io/raolivei/[project-name]-frontend:<tag>`
+
+## Key Features
+
+- [Feature 1]
+- [Feature 2]
+- [Feature 3]
+
+---
+
+**Instructions**: Copy this template when creating a new project and replace:
+- `[PROJECT_NAME]` - Project name (title case)
+- `[project-name]` - Project name (lowercase, hyphenated)
+- `[PORT]` - Assigned port numbers from workspace-config
+- `[Tech]` - Technology used (FastAPI, Next.js, etc.)
+- `[DB_NAME]` - Database name
+- `[example_file]` - Canonical example file path
+- `[ExampleComponent]` - Canonical component example
+- `[Feature N]` - Key project features
