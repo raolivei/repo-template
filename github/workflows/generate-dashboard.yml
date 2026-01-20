@@ -1,0 +1,157 @@
+# Dashboard Generation Workflow
+# Auto-generates Grafana dashboards when monitoring.yaml changes
+#
+# Prerequisites:
+#   - monitoring.yaml configured in repository root
+#   - PI_FLEET_PAT secret with write access to pi-fleet repo (org secret)
+
+name: Generate Grafana Dashboard
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'monitoring.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'monitoring.yaml'
+  workflow_dispatch:
+
+env:
+  PI_FLEET_REPO: raolivei/pi-fleet
+
+jobs:
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    outputs:
+      app_name: ${{ steps.parse.outputs.app_name }}
+      app_namespace: ${{ steps.parse.outputs.app_namespace }}
+      app_type: ${{ steps.parse.outputs.app_type }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install yq
+        uses: mikefarah/yq@v4
+
+      - name: Parse and Validate Configuration
+        id: parse
+        run: |
+          if [ ! -f "monitoring.yaml" ]; then
+            echo "::error::monitoring.yaml not found"
+            exit 1
+          fi
+          
+          app_name=$(yq -r '.app.name' monitoring.yaml)
+          app_namespace=$(yq -r '.app.namespace' monitoring.yaml)
+          app_type=$(yq -r '.app.type' monitoring.yaml)
+          
+          for field in name namespace type; do
+            val=$(yq -r ".app.$field" monitoring.yaml)
+            if [ -z "$val" ] || [ "$val" = "null" ]; then
+              echo "::error::Missing required field: app.$field"
+              exit 1
+            fi
+          done
+          
+          echo "app_name=$app_name" >> $GITHUB_OUTPUT
+          echo "app_namespace=$app_namespace" >> $GITHUB_OUTPUT
+          echo "app_type=$app_type" >> $GITHUB_OUTPUT
+
+  generate:
+    name: Generate Dashboard
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout App Repository
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Checkout pi-fleet
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PI_FLEET_REPO }}
+          ref: main
+          path: pi-fleet
+          token: ${{ secrets.PI_FLEET_PAT }}
+
+      - name: Install Dependencies
+        run: |
+          curl -sL https://github.com/google/go-jsonnet/releases/download/v0.20.0/go-jsonnet_0.20.0_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Generate Dashboard
+        run: |
+          APP_NS="${{ needs.validate.outputs.app_namespace }}"
+          CONFIG_JSON=$(yq -o=json app/monitoring.yaml)
+          
+          # Templates are in pi-fleet (will be synced there)
+          TEMPLATES_DIR="pi-fleet/helm/monitoring-stack/templates/grafonnet"
+          
+          # Create inline generation (simplified for portability)
+          cat > generate.jsonnet << 'JSONNET'
+          local config = std.parseJson(std.extVar('config'));
+          local ns = config.app.namespace;
+          local name = config.app.name;
+          
+          {
+            title: name + ' Application Dashboard',
+            uid: ns + '-dashboard',
+            tags: ['eldertree', 'auto-generated', std.asciiLower(name)],
+            timezone: 'browser',
+            schemaVersion: 38,
+            version: 1,
+            refresh: '30s',
+            editable: true,
+            time: { from: 'now-1h', to: 'now' },
+            panels: [
+              {
+                type: 'row',
+                title: 'Service Health',
+                gridPos: { h: 1, w: 24, x: 0, y: 0 },
+              },
+              {
+                type: 'stat',
+                title: 'API Status',
+                targets: [{ expr: 'count(kube_pod_status_phase{namespace="' + ns + '", pod=~"' + ns + '-api-.*", phase="Running"})', refId: 'A' }],
+                fieldConfig: {
+                  defaults: {
+                    mappings: [
+                      { type: 'value', options: { '1': { color: 'green', text: 'UP' } } },
+                      { type: 'special', options: { match: 'null', result: { color: 'red', text: 'DOWN' } } },
+                    ],
+                    thresholds: { mode: 'absolute', steps: [{ color: 'red', value: null }, { color: 'green', value: 1 }] },
+                  },
+                },
+                options: { colorMode: 'background', graphMode: 'none' },
+                gridPos: { h: 4, w: 4, x: 0, y: 1 },
+              },
+            ],
+          }
+          JSONNET
+          
+          OUTPUT="pi-fleet/helm/monitoring-stack/dashboards/${APP_NS}-dashboard.json"
+          jsonnet --ext-str config="$CONFIG_JSON" generate.jsonnet | jq '.' > "$OUTPUT"
+          echo "Generated: $OUTPUT"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PI_FLEET_PAT }}
+          path: pi-fleet
+          commit-message: "feat(monitoring): update ${{ needs.validate.outputs.app_name }} dashboard"
+          title: "feat(monitoring): update ${{ needs.validate.outputs.app_name }} dashboard"
+          body: |
+            Auto-generated dashboard from `${{ github.repository }}`.
+            
+            **App:** ${{ needs.validate.outputs.app_name }}
+            **Namespace:** ${{ needs.validate.outputs.app_namespace }}
+          branch: monitoring/${{ needs.validate.outputs.app_namespace }}-dashboard
+          base: main

@@ -130,6 +130,32 @@ paths:
   - "src/**"
 ```
 
+## Monitoring Configuration
+
+The `monitoring.yaml` file defines how Grafana dashboards are generated for your application.
+
+### Files Requiring Updates
+
+| File | Fields to Update | Description |
+|------|------------------|-------------|
+| `monitoring.yaml` | `app.name`, `app.namespace` | Application identity |
+| `monitoring.yaml` | `app.components.*` | Service names and ports |
+| `.github/workflows/generate-dashboard.yml` | N/A (auto-configured) | Dashboard generation |
+
+### Update Monitoring Config
+
+```bash
+# Edit monitoring.yaml
+vi monitoring.yaml
+
+# Replace placeholders:
+# - [PROJECT_NAME] → Your App Name (title case)
+# - [project-name] → your-namespace (lowercase)
+# - Service names → actual k8s service names
+```
+
+See `workspace-config/monitoring/README.md` for full documentation.
+
 ## Complete Replacement Checklist
 
 - [ ] Replace `PROJECT_NAME` with actual project name
@@ -139,6 +165,8 @@ paths:
 - [ ] Update workflow paths to match project structure
 - [ ] Update `github/setup-branch-protection.sh` with repository name
 - [ ] Update badge URLs in `README.md` (uncomment and update)
+- [ ] Update `monitoring.yaml` with app-specific configuration
+- [ ] Copy `github/workflows/generate-dashboard.yml` to `.github/workflows/`
 - [ ] Verify no `PROJECT_NAME` instances remain
 - [ ] Test workflows with a test PR
 
@@ -209,6 +237,8 @@ If you encounter issues with template variable replacement:
 2. Review `SETUP.md` for detailed instructions
 3. Use the automated script: `./scripts/setup-new-repo.sh`
 4. Verify replacements with: `grep -r "PROJECT_NAME" .`
+
+
 
 
 
