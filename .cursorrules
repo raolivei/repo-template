@@ -37,6 +37,25 @@ docker-compose exec postgres psql -U postgres -d [DB_NAME]  # Shell
 2. Run tests before committing
 3. Update CHANGELOG.md for all changes
 4. Never run git commands at workspace root
+5. **Check documentation** - see Documentation Maintenance below
+
+## Documentation Maintenance
+
+**Always check if documentation needs updating when making changes.**
+
+See `../workspace-config/docs/DOCUMENTATION_RULES.md` for detailed guidelines.
+
+| Change Type | CHANGELOG | Runbook | Blog | Project Docs |
+|-------------|:---------:|:-------:|:----:|:------------:|
+| Bug fix | ✓ | If new error | - | If behavior changed |
+| New feature | ✓ | If operational | If notable | ✓ |
+| Infrastructure | ✓ | If procedure | If milestone | If config |
+| Troubleshooting | ✓ | **✓** | Optional | - |
+
+**Documentation Resources:**
+- **Runbook**: `../eldertree-docs/runbook/` - Operational procedures, troubleshooting
+- **Blog**: `../pi-fleet-blog/` - Infrastructure journey, milestones
+- **Project Docs**: `./README.md`, `./docs/` - Project-specific docs
 
 ## Project Overview
 
