@@ -35,6 +35,10 @@ on:
         required: false
         default: "latest"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   # For single-component projects, use:
@@ -203,4 +207,3 @@ jobs:
   #       uses: github/codeql-action/upload-sarif@v3
   #       with:
   #         sarif_file: 'trivy-api-results.sarif'
-
