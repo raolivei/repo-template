@@ -62,7 +62,7 @@ jobs:
       # Node.js linting (if applicable)
       - name: Set up Node.js
         if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -111,7 +111,7 @@ jobs:
 
       - name: Set up Node.js
         if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -164,7 +164,7 @@ jobs:
       # Node.js tests
       - name: Set up Node.js
         if: ${{ hashFiles('package.json') != '' || hashFiles('**/package.json') != '' }}
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
