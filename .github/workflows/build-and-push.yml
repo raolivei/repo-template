@@ -81,7 +81,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
@@ -168,7 +168,7 @@ jobs:
   #         password: ${{ secrets.CR_PAT }}
   #     - name: Extract metadata for API
   #       id: meta-api
-  #       uses: docker/metadata-action@v5
+  #       uses: docker/metadata-action@v6
   #       with:
   #         images: ${{ env.IMAGE_NAME_API }}
   #         tags: |
