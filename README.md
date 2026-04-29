@@ -254,9 +254,7 @@ Then uncomment and customize the multi-component build jobs in the workflow.
 - **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)**: Quick command reference
 - **[.github/workflows/README.md](.github/workflows/README.md)**: Workflow documentation
 
-## License
-
-This template is licensed under the MIT License. See [LICENSE](LICENSE) for details.## SupportFor issues or questions:1. Check workflow logs in GitHub Actions
+## LicenseThis template is licensed under the MIT License. See [LICENSE](LICENSE) for details.## SupportFor issues or questions:1. Check workflow logs in GitHub Actions
 2. Review [SETUP.md](SETUP.md) troubleshooting section
 3. Consult [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for common commands
 4. Review workflow-specific documentation in `.github/workflows/README.md`
