@@ -52,5 +52,7 @@ jobs:
       context: .
       # For Dockerfile in subdirectory: context: ./backend, dockerfile: Dockerfile
       platforms: linux/amd64,linux/arm64
+      # Template repo has no Eldertree scale set; use GitHub-hosted
+      runs-on: ubuntu-latest
     secrets:
       REGISTRY_TOKEN: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
